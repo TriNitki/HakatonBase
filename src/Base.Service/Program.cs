@@ -49,6 +49,16 @@ public class Program
 
         services.AddHealthChecks();
 
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
+        });
+
         AddJwtBearerAuthentication(services, cfg);
 
         ConfigureDI(services, builder.Configuration);
