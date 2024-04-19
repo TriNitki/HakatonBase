@@ -6,4 +6,25 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.18" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.18" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.18" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.18">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Base.Clients\Base.Clients.csproj" />
+    <ProjectReference Include="..\Base.DataAccess\Base.DataAccess.csproj" />
+    <ProjectReference Include="..\Base.Integration\Base.Integration.csproj" />
+    <ProjectReference Include="..\Base.UseCases\Base.UseCases.csproj" />
+    <ProjectReference Include="..\Data.DI\Data.DI.csproj" />
+    <ProjectReference Include="..\UseCases.DI\UseCases.DI.csproj" />
+  </ItemGroup>
+
 </Project>
