@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.18" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.18" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.18" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.18">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Pkg\Pkg.Data.DI\Pkg.Data.DI.csproj" />
+    <ProjectReference Include="..\..\Pkg\Pkg.UseCases.DI\Pkg.UseCases.DI.csproj" />
+    <ProjectReference Include="..\Base.Clients\Base.Clients.csproj" />
+    <ProjectReference Include="..\Base.DataAccess\Base.DataAccess.csproj" />
+    <ProjectReference Include="..\Base.Integration\Base.Integration.csproj" />
+    <ProjectReference Include="..\Base.UseCases\Base.UseCases.csproj" />
+  </ItemGroup>
+
+</Project>
