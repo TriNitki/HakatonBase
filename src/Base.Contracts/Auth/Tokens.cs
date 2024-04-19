@@ -1,4 +1,4 @@
-﻿namespace Base.Contracts;
+﻿namespace Base.Contracts.Auth;
 
 /// <summary>
 /// Модель jwt токенов

@@ -6,8 +6,8 @@ using Base.UseCases.Commands.ChangePassword;
 using Base.UseCases.Commands.RefreshTokens;
 using Base.UseCases.Commands.InvalidateRefreshToken;
 using Base.UseCases.Commands.Registration;
-using Base.Contracts;
 using Microsoft.AspNetCore.Authorization;
+using Base.Contracts.Auth;
 
 namespace MNX.SecurityManagement.Service.Controllers;
 

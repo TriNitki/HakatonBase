@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Pkg.UseCases;
-using Base.Contracts;
+using Base.Contracts.Auth;
 
 namespace Base.UseCases.Commands.Registration;
 

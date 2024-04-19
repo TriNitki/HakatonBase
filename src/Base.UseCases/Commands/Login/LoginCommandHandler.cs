@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Pkg.UseCases;
-using Base.Contracts;
 using Base.UseCases.Abstractions;
 using Base.Core.Providers;
 using Base.Core;
+using Base.Contracts.Auth;
 
 namespace Base.UseCases.Commands.Login;
 

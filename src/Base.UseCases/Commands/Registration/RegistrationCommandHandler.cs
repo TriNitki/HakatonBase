@@ -1,13 +1,13 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Options;
 using Pkg.UseCases;
-using Base.Contracts;
 using Base.Core;
 using Base.Core.Options;
 using Base.UseCases.Abstractions;
 using Base.UseCases.Commands.Login;
 using AutoMapper;
 using Base.Core.Providers;
+using Base.Contracts.Auth;
 
 namespace Base.UseCases.Commands.Registration;
 
