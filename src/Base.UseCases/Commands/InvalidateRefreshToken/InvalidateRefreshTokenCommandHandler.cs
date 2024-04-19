@@ -9,16 +9,20 @@ namespace Base.UseCases.Commands.InvalidateRefreshToken;
 /// </summary>
 public class InvalidateRefreshTokenCommandHandler : IRequestHandler<InvalidateRefreshTokenCommand, Result<Unit>>
 {
-    private readonly ITokenService _tokenService;
+    private readonly ITokenRepository _refreshTokenRepository;
 
-    public InvalidateRefreshTokenCommandHandler(ITokenService tokenService)
+    public InvalidateRefreshTokenCommandHandler(ITokenRepository refreshTokenRepository)
     {
-        _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public async Task<Result<Unit>> Handle(InvalidateRefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        await _tokenService.DeactivateRefreshToken(request.RefreshToken);
+        var token = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken);
+        if (token == null)
+            return Result<Unit>.Invalid("Token wasn't found");
+
+        await _refreshTokenRepository.UseByTokenAsync(token.Token);
         return Result<Unit>.Empty();
     }
 }

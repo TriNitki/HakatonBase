@@ -4,6 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	 <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,9 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Pkg\Pkg.Data.DI\Pkg.Data.DI.csproj" />
     <ProjectReference Include="..\..\Pkg\Pkg.UseCases.DI\Pkg.UseCases.DI.csproj" />
-    <ProjectReference Include="..\Base.Clients\Base.Clients.csproj" />
     <ProjectReference Include="..\Base.DataAccess\Base.DataAccess.csproj" />
-    <ProjectReference Include="..\Base.Integration\Base.Integration.csproj" />
     <ProjectReference Include="..\Base.UseCases\Base.UseCases.csproj" />
   </ItemGroup>
 

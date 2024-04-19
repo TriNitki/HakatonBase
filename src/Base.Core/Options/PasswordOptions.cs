@@ -1,8 +1,5 @@
 ﻿namespace Base.Core.Options;
 
-/// <summary>
-/// Параметры пароля.
-/// </summary>
 public class PasswordOptions
 {
     /// <summary>

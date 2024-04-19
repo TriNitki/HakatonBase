@@ -1,12 +1,9 @@
-﻿namespace Base.Service.Options;
+﻿namespace Base.Core.Options;
 
-/// <summary>
-/// Параметры безопасности.
-/// </summary>
 public class SecurityOptions
 {
     /// <summary>
-    /// Секретный ключ для генерации JWT токена 
+    /// Сектретный ключ для генерации JWT токена 
     /// </summary>
     public string SecretKey { get; set; } = string.Empty;
 

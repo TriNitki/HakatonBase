@@ -1,19 +1,26 @@
 using Pkg.Data.DI;
-using Base.Integration;
 using Base.DataAccess;
-using Base.Core.Options;
 using Base.Service.Options;
 using Base.UseCases.Abstractions;
 using Base.UseCases.Commands.Login;
-using MNX.SecurityManagement.DataAccess.Repositories;
-using MNX.SecurityManagement.Service.Infrastructure;
-using System.Reflection;
 using MNX.SecurityManagement.DataAccess;
+using AutoMapper;
+using Base.Core.Providers;
+using Base.Service.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Base.UseCases;
+using Base.DataAccess.Repositories;
+using Base.Core.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace Service;
 
+/// <inheritdoc/>
 public class Program
 {
+    /// <inheritdoc/>
     public static async Task Main(string[] args)
     {
         try
@@ -27,71 +34,86 @@ public class Program
         }
     }
 
-    /// <summary>
-    /// Настроить приложение.
-    /// </summary>
     private static WebApplicationBuilder ConfigureApp(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.Logging.ClearProviders();
 
         var services = builder.Services;
         var cfg = builder.Configuration;
 
         services.AddControllers();
         services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
+
+        services.AddAuthorization();
 
         services.AddHealthChecks();
 
-        services.AddCors(options =>
-        {
-            options.AddDefaultPolicy(policy =>
-            {
-                policy.AllowAnyOrigin()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-            });
-        });
+        AddJwtBearerAuthentication(services, cfg);
 
-        services.AddJwtBearerAuthentication(
-            cfg.GetSection(nameof(SecurityOptions))[nameof(SecurityOptions.SecretKey)]!);
-
-        AddAuthorization(services, cfg);
-
-        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        var xmlFilePath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-        services.AddSwagger(xmlFilePath);
-
-        ConfigureDI(services, cfg);
+        ConfigureDI(services, builder.Configuration);
 
         return builder;
     }
 
-    /// <summary>
-    /// Настроить DI контейнер.
-    /// </summary>
-    private static void ConfigureDI(IServiceCollection services, ConfigurationManager configuration)
+    private static void ConfigureDI(IServiceCollection services, ConfigurationManager cfg)
     {
-        services.AddAutoMapper(typeof(DbMappingProfile).Assembly);
+        services.AddAutoMapper(cfg => cfg.AddProfile(typeof(DbMappingProfile)));
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LoginCommand).Assembly));
-        services.AddDataContext<DataBaseContext>(configuration);
 
-        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddDataContext<DataBaseContext>(cfg);
+        services.AddMemoryCache();
+
+        services.AddHttpContextAccessor();
+        services.AddScoped<IAuthUserAccessor, AuthUserAccessor>();
+
+        services.ConfigureOptions<SwaggerGenOptionsSetup>();
+
+        services.AddScoped<ITokenRepository, TokenRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<ITokenService, TokenService>();
+
+        services.AddScoped<IJwtProvider, JwtProvider>();
+        services.AddSingleton<IPasswordHashProvider, PasswordHashProvider>();
+
+        services.AddSingleton(provider => new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile(new MappingProfiles(provider.GetService<IPasswordHashProvider>() ??
+                throw new ArgumentNullException("IPasswordHashProvider", "Отсутсвует реализация IPasswordHashProvider")));
+        }).CreateMapper());
     }
 
     /// <summary>
-    /// Добавить необходимые для авторизации сервисы в DI
+    /// Добавить необходимые для аутентификации сервисы в DI
     /// </summary>
-    private static void AddAuthorization(IServiceCollection services, IConfiguration configuration)
+    private static void AddJwtBearerAuthentication(IServiceCollection services, ConfigurationManager cfg)
     {
-        services.AddMemoryCache();
+        string securityKey = cfg.GetSection(nameof(SecurityOptions))[nameof(SecurityOptions.SecretKey)]!;
 
-        // authorized user
-        services.AddHttpContextAccessor();
+        if (string.IsNullOrWhiteSpace(securityKey))
+        {
+            throw new ArgumentException("Не задан ключ безопасности", nameof(securityKey));
+        }
 
-        var securityOptionsSection = configuration.GetSection(nameof(SecurityOptions));
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    // ключ безопасности
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey)),
+                    // валидация ключа безопасности
+                    ValidateIssuerSigningKey = false,
+                    // будет ли валидироваться время существования
+                    ValidateLifetime = false,
+                    // указывает, будет ли валидироваться издатель при валидации токена
+                    ValidateIssuer = false,
+                    // будет ли валидироваться потребитель токена
+                    ValidateAudience = false,
+                };
+            });
+
+        var securityOptionsSection = cfg.GetSection(nameof(SecurityOptions));
         services.Configure<SecurityOptions>(x =>
         {
             x.SecretKey = securityOptionsSection[nameof(SecurityOptions.SecretKey)]
@@ -113,37 +135,27 @@ public class Program
         });
     }
 
-    /// <summary>
-    /// Запустить приложение.
-    /// </summary>
     private static async Task RunApp(WebApplicationBuilder builder)
     {
         var app = builder.Build();
         var appName = builder.Configuration["ServiceName"]
-            ?? throw new ArgumentNullException(null, "Не указано название сервиса");
+            ?? throw new ArgumentNullException("ServiceName", "Не указано название сервиса");
 
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI();
-
-            using var scope = app.Services.CreateScope();
-            var services = scope.ServiceProvider;
-            var context = services.GetRequiredService<DataBaseContext>();
-            context.Database.EnsureCreated();
         }
 
         app.UseRouting();
-        app.UseCors();
-
-        app.MapHealthChecks("/health").AllowAnonymous();
-        app.MapGet(string.Empty, async ctx => await ctx.Response.WriteAsync(appName)).AllowAnonymous();
 
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
+        app.MapHealthChecks("/health");
+        app.MapGet(string.Empty, async ctx => await ctx.Response.WriteAsync(appName));
 
         await app.RunAsync();
     }

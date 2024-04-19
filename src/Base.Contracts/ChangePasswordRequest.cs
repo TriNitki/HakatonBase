@@ -1,9 +1,22 @@
 ﻿namespace Base.Contracts;
 
 /// <summary>
-/// Модель запроса на смену пароля.
+/// Модель запроса на смену пароля
 /// </summary>
-/// <param name="Login"> Логин. </param>
-/// <param name="Password"> Пароль. </param>
-/// <param name="NewPassword"> Новый пароль. </param>
-public record ChangePasswordRequest(string Login, string Password, string NewPassword);
+public class ChangePasswordRequest
+{
+    /// <summary>
+    /// Логин пользователя
+    /// </summary>
+    public string Login { get; set; }
+
+    /// <summary>
+    /// Текущий пароль пользователя
+    /// </summary>
+    public string Password { get; set; }
+
+    /// <summary>
+    /// Новый пароль пользователя
+    /// </summary>
+    public string NewPassword { get; set; }
+}

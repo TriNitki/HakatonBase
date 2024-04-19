@@ -16,7 +16,6 @@ namespace MNX.SecurityManagement.Service.Controllers;
 /// </summary>
 [Route("api/auth")]
 [ApiController]
-[AllowAnonymous]
 public class AuthController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -64,8 +63,9 @@ public class AuthController : ControllerBase
     /// <param name="request"> JSON объект, содержащий логин/старый пароль/новый пароль </param>
     /// <response code="200"> Успешно </response>
     /// <response code="400"> Переданные параметры не прошли валидацию </response>
+    [Authorize]
     [HttpPut("changePassword")]
-    [ProducesResponseType(typeof(Tokens), 200)]
+    [ProducesResponseType(typeof(void), 200)]
     [ProducesResponseType(typeof(List<string>), 400)]
     public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
     {

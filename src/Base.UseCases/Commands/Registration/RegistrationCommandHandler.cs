@@ -6,50 +6,51 @@ using Base.Core;
 using Base.Core.Options;
 using Base.UseCases.Abstractions;
 using Base.UseCases.Commands.Login;
+using AutoMapper;
+using Base.Core.Providers;
 
 namespace Base.UseCases.Commands.Registration;
 
 /// <summary>
 /// Обработчик команды авторизации.
 /// </summary>
-public class RegistrationCommandHandler : LoginBaseHandler, IRequestHandler<RegistrationCommand, Result<Tokens>>
+public class RegistrationCommandHandler : IRequestHandler<RegistrationCommand, Result<Tokens>>
 {
-    /// <summary>
-    /// Репозиторий для доступа к пользователям.
-    /// </summary>
     private readonly IUserRepository _userRepository;
+    private readonly IJwtProvider _jwtProvider;
+    private readonly IPasswordHashProvider _passwordHashProvider;
+    private readonly IMapper _mapper;
 
-    /// <summary>
-    /// Параметры пароля.
-    /// </summary>
-    private readonly PasswordOptions _passwordOptions;
-
-    /// <summary>
-    /// Роли пользователя по умолчанию.
-    /// </summary>
-    private readonly string[] _defaultUserRoles;
 
     public RegistrationCommandHandler(
         IUserRepository userRepository,
-        ITokenService tokenService,
-        IOptions<PasswordOptions> passwordOptions,
-        IOptions<List<string>> roles) : base(tokenService)
+        IJwtProvider jwtProvider,
+        IPasswordHashProvider passwordHashProvider,
+        IMapper mapper)
     {
         _userRepository = userRepository;
-        _passwordOptions = passwordOptions.Value;
-        _defaultUserRoles = roles.Value.ToArray() ?? throw new ArgumentNullException(nameof(roles));
+        _mapper = mapper;
+        _jwtProvider = jwtProvider;
+        _passwordHashProvider = passwordHashProvider;
     }
 
     public async Task<Result<Tokens>> Handle(RegistrationCommand request, CancellationToken cancellationToken)
     {
-        if (await _userRepository.Resolve(request.Login) is not null)
-        {
+        if (await _userRepository.GetByLoginAsync(request.Login) != null)
             return Result<Tokens>.Conflict("User with this login already exists");
-        }
 
-        var user = await _userRepository.CreateAsync(
-                new AuthUser(request.Login, request.Password, _passwordOptions, _defaultUserRoles));
+        var user = _mapper.Map<User>(request);
+        await _userRepository.CreateAsync(user);
 
-        return await Handle(user);
+        string accessToken = _jwtProvider.GenerateAccess(user.Id, user.Nickname);
+        RefreshToken refreshToken = await _jwtProvider.GenerateSaveRefreshAsync(user.Id);
+
+        return Result<Tokens>.Success(
+            new Tokens()
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token,
+                RefreshExpiration = refreshToken.Expiration
+            });
     }
 }

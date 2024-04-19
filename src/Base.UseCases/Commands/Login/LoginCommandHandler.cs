@@ -1,47 +1,49 @@
 ﻿using MediatR;
-using Microsoft.Extensions.Options;
 using Pkg.UseCases;
 using Base.Contracts;
-using Base.Core.Options;
-using Base.Core.Services;
 using Base.UseCases.Abstractions;
+using Base.Core.Providers;
+using Base.Core;
 
 namespace Base.UseCases.Commands.Login;
 
 /// <summary>
 /// Обработчик команды логина.
 /// </summary>
-public class LoginCommandHandler : LoginBaseHandler, IRequestHandler<LoginCommand, Result<Tokens>>
+public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<Tokens>>
 {
     private readonly IUserRepository _userRepository;
-    private readonly string _salt;
+    private readonly IJwtProvider _jwtProvider;
+    private readonly IPasswordHashProvider _passwordHashProvider;
 
     public LoginCommandHandler(
         IUserRepository userRepository,
-        ITokenService tokenService,
-        IOptions<PasswordOptions> passwordOptions) : base(tokenService)
+        IJwtProvider jwtProvider,
+        IPasswordHashProvider passwordHashProvider)
     {
         _userRepository = userRepository;
-        _salt = passwordOptions.Value.Salt ?? throw new ArgumentNullException(nameof(passwordOptions));
+        _jwtProvider = jwtProvider;
+        _passwordHashProvider = passwordHashProvider;
     }
 
     public async Task<Result<Tokens>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.Resolve(
+        var user = await _userRepository.GetByLoginPasswordAsync(
             request.Login,
-            CryptographyService.HashPassword(request.Password, _salt));
+            _passwordHashProvider.Encrypt(request.Password));
 
-        if (user is null)
-        {
-            return Result<Tokens>.Invalid("Invalid password or login");
-        }
+        if (user == null)
+            return Result<Tokens>.Invalid("User wasn't found");
 
-        if (user.IsBlocked)
-        {
-            // TODO: возвращать 401 статус код. Сделать кастомный результат логина.
-            return Result<Tokens>.Invalid("User is blocked");
-        }
+        string accessToken = _jwtProvider.GenerateAccess(user.Id, user.Nickname);
+        RefreshToken refreshToken = await _jwtProvider.GenerateSaveRefreshAsync(user.Id);
 
-        return await Handle(user);
+        return Result<Tokens>.Success(
+            new Tokens()
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token,
+                RefreshExpiration = refreshToken.Expiration
+            });
     }
 }

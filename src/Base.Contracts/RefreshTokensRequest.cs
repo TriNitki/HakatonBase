@@ -1,7 +1,12 @@
 ﻿namespace Base.Contracts;
 
 /// <summary>
-/// Модель запроса на обновление токенов авторизации.
+/// Модель запроса на обновление пары токенов
 /// </summary>
-/// <param name="RefreshToken"> Токен обновления. </param>
-public record RefreshTokensRequest(string RefreshToken);
+public class RefreshTokensRequest
+{
+    /// <summary>
+    /// Refresh токен
+    /// </summary>
+    public string RefreshToken { get; set; }
+}

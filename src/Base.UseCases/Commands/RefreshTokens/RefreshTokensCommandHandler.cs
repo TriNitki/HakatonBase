@@ -2,41 +2,49 @@
 using Pkg.UseCases;
 using Base.Contracts;
 using Base.UseCases.Abstractions;
-using Base.UseCases.Commands.Login;
+using Base.Core.Providers;
+using Base.Core;
 
 namespace Base.UseCases.Commands.RefreshTokens;
 
 /// <summary>
 /// Обработчик команды обновления токенов авторизации.
 /// </summary>
-public class RefreshTokensCommandHandler : LoginBaseHandler, IRequestHandler<RefreshTokensCommand, Result<Tokens>>
+public class RefreshTokensCommandHandler : IRequestHandler<RefreshTokensCommand, Result<Tokens>>
 {
     private readonly IUserRepository _userRepository;
+    private readonly IJwtProvider _jwtProvider;
 
     public RefreshTokensCommandHandler(
         IUserRepository userRepository,
-        ITokenService tokenService) : base(tokenService)
+        IJwtProvider jwtProvider)
     {
         _userRepository = userRepository;
+        _jwtProvider = jwtProvider;
     }
 
     public async Task<Result<Tokens>> Handle(RefreshTokensCommand request, CancellationToken cancellationToken)
     {
-        var refreshToken = await _tokenService.DeactivateRefreshToken(request.RefreshToken);
+        var token = await _jwtProvider.GetRefreshByToken(request.RefreshToken);
+        if (token == null)
+            return Result<Tokens>.Invalid("Token wasn't found");
 
-        if (refreshToken is null)
-        {
-            return Result<Tokens>.Invalid("Refresh token is incorrect");
-        }
+        if (token.IsUsed)
+            return Result<Tokens>.Invalid("Token is already used");
 
-        var user = await _userRepository.GetByIdAsync(refreshToken.UserId) ?? throw new NullReferenceException();
+        var user = await _userRepository.GetByIdAsync(token.UserId) ?? throw new NullReferenceException();
 
-        if (user.IsBlocked)
-        {
-            // TODO: возвращать 401 статус код. Сделать кастомный результат логина.
-            return Result<Tokens>.Invalid("User is blocked");
-        }
+        await _jwtProvider.UseRefreshByTokenAsync(token.Token);
 
-        return await Handle(user);
+        string accessToken = _jwtProvider.GenerateAccess(user.Id, user.Nickname);
+        RefreshToken refreshToken = await _jwtProvider.GenerateSaveRefreshAsync(user.Id);
+
+        return Result<Tokens>.Success(
+            new Tokens()
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token,
+                RefreshExpiration = refreshToken.Expiration
+            });
     }
 }

@@ -1,19 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Base.DataAccess.Dto;
+using Base.Core;
 
 namespace Base.DataAccess.Cfg;
 
 /// <summary>
 /// Конфигурация таблицы с токенами обновления.
 /// </summary>
-internal class RefreshTokenDtoCfg : IEntityTypeConfiguration<RefreshTokenDto>
+internal class RefreshTokenCfg : IEntityTypeConfiguration<RefreshToken>
 {
-    public void Configure(EntityTypeBuilder<RefreshTokenDto> builder)
+    public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {
         builder.HasKey(x => x.Token);
 
-        builder.HasOne<UserDto>()
+        builder.HasOne<User>()
             .WithMany()
             .HasForeignKey(x => x.UserId);
     }

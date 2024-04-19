@@ -1,49 +1,43 @@
 ﻿using MediatR;
-using Microsoft.Extensions.Options;
 using Pkg.UseCases;
-using Base.Contracts;
-using Base.Core.Options;
-using Base.Core.Services;
 using Base.UseCases.Abstractions;
-using Base.UseCases.Commands.Login;
+using Base.Core.Providers;
 
 namespace Base.UseCases.Commands.ChangePassword;
 
 /// <summary>
 /// Обработчик команды изменения пароля.
 /// </summary>
-public class ChangePasswordCommandHandler : LoginBaseHandler, IRequestHandler<ChangePasswordCommand, Result<Tokens>>
+public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand, Result<Unit>>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IRefreshTokenRepository _refreshTokenRepository;
-    private readonly PasswordOptions _passwordOptions;
+    private readonly ITokenRepository _refreshTokenRepository;
+    private readonly IPasswordHashProvider _passwordHashProvider;
 
     public ChangePasswordCommandHandler(
         IUserRepository userRepository,
-        IRefreshTokenRepository refreshTokenRepository,
-        IOptions<PasswordOptions> passwordOptions,
-        ITokenService tokenService) : base(tokenService)
+        ITokenRepository refreshTokenRepository,
+        IPasswordHashProvider passwordHashProvider)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
-        _passwordOptions = passwordOptions.Value ?? throw new ArgumentNullException(nameof(passwordOptions));
+        _passwordHashProvider = passwordHashProvider;
     }
 
-    public async Task<Result<Tokens>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Unit>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.Resolve(
+        var user = await _userRepository.GetByLoginPasswordAsync(
             request.Login,
-            CryptographyService.HashPassword(request.Password, _passwordOptions.Salt));
+            _passwordHashProvider.Encrypt(request.Password));
 
-        if (user is null)
-        {
-            return Result<Tokens>.Invalid("Invalid password or login");
-        }
+        if (user == null)
+            return Result<Unit>.Invalid("User wasn't found");
 
-        user.SetPassword(request.NewPassword, _passwordOptions);
+        user.PasswordHash = _passwordHashProvider.Encrypt(request.NewPassword);
+
         await _userRepository.UpdateAsync(user);
-        await _refreshTokenRepository.DeactivateAllTokensAsync(user.Id);
 
-        return await Handle(user);
+        await _refreshTokenRepository.UseAllByUserIdAsync(user.Id);
+        return Result<Unit>.Empty();
     }
 }

@@ -1,9 +1,9 @@
 ﻿namespace Base.Contracts;
 
 /// <summary>
-/// Модель запроса на логин
+/// Модель логина по смс коду
 /// </summary>
-public class LoginRequest
+public class SmsCodeRequest
 {
     /// <summary>
     /// Логин пользователя
@@ -11,7 +11,7 @@ public class LoginRequest
     public string Login { get; set; }
 
     /// <summary>
-    /// Пароль пользователя
+    /// Код из смс
     /// </summary>
-    public string Password { get; set; }
+    public string Code { get; set; }
 }

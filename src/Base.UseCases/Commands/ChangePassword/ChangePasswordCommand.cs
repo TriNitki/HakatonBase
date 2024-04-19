@@ -7,7 +7,7 @@ namespace Base.UseCases.Commands.ChangePassword;
 /// <summary>
 /// Команда на изменение пароля.
 /// </summary>
-public class ChangePasswordCommand : IRequest<Result<Tokens>>
+public class ChangePasswordCommand : IRequest<Result<Unit>>
 {
     /// <summary>
     /// Логин.
