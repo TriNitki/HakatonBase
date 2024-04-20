@@ -16,4 +16,6 @@ public class CreateEventCommand : IRequest<Result<Guid>>
     public DateTime StartAt { get; set; }
 
     public double? Cost { get; set; }
+
+    public List<string>? Categories { get; set; }
 }

@@ -12,10 +12,13 @@ public class DataBaseContext : DbContext
     internal DbSet<User> Users { get; set; }
     internal DbSet<RefreshToken> RefreshTokens { get; set; }
     internal DbSet<Event> Events { get; set; }
-    internal DbSet<EventGuest> EventGuests { get; set; }
     internal DbSet<Category> Categories { get; set; }
 
-    
+
+    internal DbSet<EventToCategory> EventToCategory { get; set; }
+    internal DbSet<EventToUser> EventToUser { get; set; }
+    internal DbSet<UserToCategory> UserToCategory { get; set; }
+
 
     public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options) { }
 

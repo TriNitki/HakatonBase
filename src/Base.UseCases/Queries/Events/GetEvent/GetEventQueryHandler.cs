@@ -21,9 +21,12 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQuery, Result<EventD
 
         List<string> cats = new();
 
-        foreach (var cat in eventDto.Categories)
-            cats.Add(cat.Name);
-      
+        if (eventDto.EventToCategory != null)
+        {
+            foreach (var cat in eventDto.EventToCategory)
+                cats.Add(cat.CategoryName);
+        }
+
 
         return Result<EventDto>.Success(new EventDto()
         {

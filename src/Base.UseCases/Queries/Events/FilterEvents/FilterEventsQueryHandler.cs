@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Base.Contracts.Event;
+using Base.Core.Domain;
 using Base.UseCases.Abstractions;
 using MediatR;
 using Pkg.UseCases;
@@ -22,6 +23,7 @@ public class FilterEventsQueryHandler : IRequestHandler<FilterEventsQuery, Resul
     {
         var events = await eventRepository.Filter(request.City, new List<string>(request.Categories), request.ByPopularity);
         List<ReducedEventDto> result = new();
+
 
         foreach (var x in events) 
         {

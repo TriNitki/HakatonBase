@@ -8,9 +8,11 @@ public interface IEventRepository
 
     Task<Event?> GetById(Guid id);
 
-    Task<Guid?> Create(Event newEvent);
+    Task<Guid?> Create(Event newEvent, List<string>? categories);
 
     Task<List<Event>?> GetMaderationList();
 
     Task ProcessEvent(Guid id, bool isApproved);
+
+    Task GoToEvent(Guid id, long userId);
 }

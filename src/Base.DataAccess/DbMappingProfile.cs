@@ -2,7 +2,7 @@
 using Base.Contracts.Event;
 using Base.Core.Domain;
 
-namespace MNX.SecurityManagement.DataAccess;
+namespace Base.DataAccess;
 
 /// <summary>
 /// Конфигурация маппера.

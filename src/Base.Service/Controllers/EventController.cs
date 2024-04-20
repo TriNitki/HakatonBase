@@ -8,6 +8,7 @@ using Base.UseCases.Commands.Events.CreateEvent;
 using Base.UseCases.Queries.Events.GetEvent;
 using Base.UseCases.Commands.Events.ModerateEvent;
 using Base.UseCases.Queries.Events.GetEventsForModeration;
+using Base.UseCases.Abstractions;
 
 namespace Base.Service.Controllers;
 
@@ -19,11 +20,15 @@ namespace Base.Service.Controllers;
 public class EventController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IEventRepository eventRepository;
+    private readonly IAuthUserAccessor authUserAccessor;
 
     /// <inheritdoc/>
-    public EventController(IMediator mediator)
+    public EventController(IMediator mediator, IEventRepository eventRepository, IAuthUserAccessor authUserAccessor)
     {
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        this.eventRepository = eventRepository;
+        this.authUserAccessor = authUserAccessor;
     }
 
     /// <summary>
@@ -117,4 +122,18 @@ public class EventController : ControllerBase
         var result = await _mediator.Send(request);
         return result.ToActionResult();
     }
+
+    /// <summary>
+    /// Отправить заявку на участие в ивенте
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPatch("favorite")]
+    [Authorize]
+    public async Task<IActionResult> GoToEvent(GoToEventRequest request)
+    {
+        await eventRepository.GoToEvent(request.EventId, authUserAccessor.GetUserId());
+        return Ok();
+    }
+    
 }

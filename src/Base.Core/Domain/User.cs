@@ -10,5 +10,5 @@ public class User
     public bool IsBlocked { get; set; } = false;
     public string? Email { get; set; }
 
-    public List<Category>? Categories { get; set; }
+    public List<EventToUser>? EventToUser { get; set; }
 }

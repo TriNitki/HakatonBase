@@ -14,9 +14,10 @@ public class EventRepository : IEventRepository
     }
 
 
-    public async Task<Guid?> Create(Event newEvent)
+    public async Task<Guid?> Create(Event newEvent, List<string>? categories)
     {
         await _context.Events.AddAsync(newEvent).ConfigureAwait(false);
+        await _context.EventToCategory.AddRangeAsync(categories.Select(x => new EventToCategory() { CategoryName = x, EventId = newEvent.Id }));
         await _context.SaveChangesAsync().ConfigureAwait(false);
 
         return newEvent.Id;
@@ -24,7 +25,7 @@ public class EventRepository : IEventRepository
 
     public async Task<List<Event>?> Filter(string? city, List<string>? categories, bool byPopularity = false)
     {
-        var events = _context.Events.Include("Guests").Include("Categories").AsQueryable();
+        var events = _context.Events.AsQueryable();
 
         events = events.Where(e => e.IsModerated)
             .Where(e => e.StartAt > DateTime.UtcNow)
@@ -37,14 +38,14 @@ public class EventRepository : IEventRepository
 
         if (byPopularity)
         {
-            events = events.OrderByDescending(e => e.Guests.Count);
+            events = events.OrderByDescending(e => e.EventToUser.Count);
         }
 
         if (categories != null)
         {
             foreach (var category in categories)
             {
-                events = events.Where(e => e.Categories.Any(x => x.Name == category));
+                events = events.Where(e => e.EventToCategory.Any(x => x.CategoryName == category));
             }
         }
 
@@ -54,7 +55,7 @@ public class EventRepository : IEventRepository
     public async Task<Event?> GetById(Guid id)
     {
         return await _context.Events
-            .Include("Creator").Include("Categories")
+            .Include("Creator").Include("EventToCategory")
             .AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == id)
             .ConfigureAwait(false);
@@ -68,6 +69,12 @@ public class EventRepository : IEventRepository
             .OrderByDescending(x => x.StartAt)
             .ToListAsync()
             .ConfigureAwait(false);
+    }
+
+    public async Task GoToEvent(Guid id, long userId)
+    {
+        await _context.EventToUser.AddAsync(new EventToUser() { EventId = id, UserId = userId}).ConfigureAwait(false);
+        await _context.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async Task ProcessEvent(Guid id, bool isApproved)

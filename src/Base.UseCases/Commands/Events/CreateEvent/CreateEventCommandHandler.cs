@@ -21,9 +21,22 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Res
 
     public async Task<Result<Guid>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
-        var newEvent = mapper.Map<Event>(request);
+        var newEvent = new Event()
+        {
+            Name = request.Name,
+            Description = request.Description,
+            Location = request.Location,
+            City = request.City,
+            StartAt = request.StartAt,
+            PublishedAt = DateTime.UtcNow,
+            Cost = request.Cost,
+            IsActive = true,
+            IsModerated = false
+        };
+
         newEvent.CreatorId = authUserAccessor.GetUserId();
-        await eventRepository.Create(newEvent);
+
+        await eventRepository.Create(newEvent, request.Categories);
 
         return Result<Guid>.SuccessfullyCreated(newEvent.Id);
     }
