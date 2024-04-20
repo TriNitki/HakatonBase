@@ -1,13 +1,13 @@
 ﻿using Pkg.UseCases;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Base.UseCases.Commands.Login;
-using Base.UseCases.Commands.ChangePassword;
-using Base.UseCases.Commands.RefreshTokens;
-using Base.UseCases.Commands.InvalidateRefreshToken;
-using Base.UseCases.Commands.Registration;
-using Base.Contracts;
+using Base.UseCases.Commands.Auth.Login;
+using Base.UseCases.Commands.Auth.ChangePassword;
+using Base.UseCases.Commands.Auth.RefreshTokens;
 using Microsoft.AspNetCore.Authorization;
+using Base.Contracts.Auth;
+using Base.UseCases.Commands.Auth.InvalidateRefreshToken;
+using Base.UseCases.Commands.Auth.Registration;
 
 namespace MNX.SecurityManagement.Service.Controllers;
 

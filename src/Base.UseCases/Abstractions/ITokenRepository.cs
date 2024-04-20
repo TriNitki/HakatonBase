@@ -1,4 +1,4 @@
-﻿using Base.Core;
+﻿using Base.Core.Domain;
 
 namespace Base.UseCases.Abstractions;
 
