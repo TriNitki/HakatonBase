@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Base.Core;
 using Base.UseCases.Abstractions;
-
+using Base.Core.Domain;
 
 namespace Base.DataAccess.Repositories;
 

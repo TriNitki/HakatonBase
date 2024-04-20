@@ -2,7 +2,6 @@ using Pkg.Data.DI;
 using Base.DataAccess;
 using Base.Service.Options;
 using Base.UseCases.Abstractions;
-using Base.UseCases.Commands.Login;
 using MNX.SecurityManagement.DataAccess;
 using AutoMapper;
 using Base.Core.Providers;
@@ -14,6 +13,7 @@ using Base.Core.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Base.UseCases.Commands.Auth.Login;
 
 namespace Service;
 
@@ -58,7 +58,7 @@ public class Program
 
     private static void ConfigureDI(IServiceCollection services, ConfigurationManager cfg)
     {
-        services.AddAutoMapper(cfg => cfg.AddProfile(typeof(DbMappingProfile)));
+        services.AddAutoMapper(typeof(DbMappingProfile).Assembly);
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LoginCommand).Assembly));
 
         services.AddDataContext<DataBaseContext>(cfg);
@@ -71,6 +71,7 @@ public class Program
 
         services.AddScoped<ITokenRepository, TokenRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
 
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddSingleton<IPasswordHashProvider, PasswordHashProvider>();

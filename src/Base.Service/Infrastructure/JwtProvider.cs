@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Base.Core;
 using Base.Core.Options;
 using Base.Core.Providers;
 using Base.UseCases.Abstractions;
@@ -8,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
+using Base.Core.Domain;
 
 namespace Base.Service.Infrastructure;
 

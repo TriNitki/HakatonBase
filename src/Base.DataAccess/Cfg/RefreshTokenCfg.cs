@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Base.Core;
+using Base.Core.Domain;
 
 namespace Base.DataAccess.Cfg;
 

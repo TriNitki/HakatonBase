@@ -8,5 +8,5 @@ public class ReducedEventDto
 
     public string City { get; set; } = string.Empty;
 
-    public DateTime StartDT { get; set; }
+    public DateTime StartAt { get; set; }
 }

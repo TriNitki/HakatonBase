@@ -1,8 +1,13 @@
-﻿using Base.Contracts.Auth;
+﻿using Pkg.UseCases;
 using Base.Contracts.Event;
+using Base.UseCases.Queries.Events.FilterEvents;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Base.UseCases.Commands.Events.CreateEvent;
+using Base.UseCases.Queries.Events.GetEvent;
+using Base.UseCases.Commands.Events.ModerateEvent;
+using Base.UseCases.Queries.Events.GetEventsForModeration;
 
 namespace Base.Service.Controllers;
 
@@ -26,14 +31,21 @@ public class EventController : ControllerBase
     /// </summary>
     /// <param name="city"> Город </param>
     /// <param name="categories"> Категории </param>
+    /// <param name="byPopularity"> По популярности </param>
     /// <response code="200"> Успешно </response>
     /// <response code="400"> Переданные параметры не прошли валидацию </response>
     [HttpGet]
     [ProducesResponseType(typeof(List<ReducedEventDto>), 200)]
     [ProducesResponseType(typeof(List<string>), 400)]
-    public async Task<IActionResult> FilterEvents([FromQuery] string? city, [FromQuery] string[] categories)
+    public async Task<IActionResult> FilterEvents([FromQuery] string? city, [FromQuery] bool byPopularity = false, [FromQuery] string[]? categories = null)
     {
-        throw new NotImplementedException();
+        var result = await _mediator.Send(new FilterEventsQuery()
+        {
+            City = city,
+            ByPopularity = byPopularity,
+            Categories = categories
+        });
+        return result.ToActionResult();
     }
 
     /// <summary>
@@ -43,13 +55,14 @@ public class EventController : ControllerBase
     /// <response code="200"> Успешно </response>
     /// <response code="400"> Переданные параметры не прошли валидацию </response>
     /// <response code="404"> Ивент не был найден </response>
-    [HttpGet("{id:int}")]
+    [HttpGet("{eventId:Guid}")]
     [ProducesResponseType(typeof(EventDto), 200)]
     [ProducesResponseType(typeof(List<string>), 400)]
     [ProducesResponseType(typeof(List<string>), 404)]
-    public async Task<IActionResult> GetEvent(int eventId)
+    public async Task<IActionResult> GetEvent(Guid eventId)
     {
-        throw new NotImplementedException();
+        var result = await _mediator.Send(new GetEventQuery() { Id = eventId});
+        return result.ToActionResult();
     }
 
     /// <summary>
@@ -63,61 +76,10 @@ public class EventController : ControllerBase
     [ProducesResponseType(typeof(ReducedEventDto), 201)]
     [ProducesResponseType(typeof(List<string>), 400)]
     [ProducesResponseType(typeof(List<string>), 404)]
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> Create(CreateEventCommand request)
     {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Установка статуса ивента
-    /// </summary>
-    /// <response code="201"> Успешно создан </response>
-    /// <response code="400"> Переданные параметры не прошли валидацию </response>
-    /// <response code="401"> Пользователь не авторизован </response>
-    /// <response code="403"> Пользователь имеет недостаточно прав </response>
-    /// <response code="404"> Ивент не найдено </response>
-    [HttpPatch("status")]
-    [Authorize]
-    [ProducesResponseType(typeof(void), 204)]
-    [ProducesResponseType(typeof(List<string>), 400)]
-    [ProducesResponseType(typeof(List<string>), 401)]
-    [ProducesResponseType(typeof(List<string>), 403)]
-    [ProducesResponseType(typeof(List<string>), 404)]
-    public async Task<IActionResult> SetStatus()
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Изменить ивент
-    /// </summary>
-    /// <response code="204"> Успешно </response>
-    /// <response code="400"> Переданные параметры не прошли валидацию </response>
-    /// <response code="401"> Пользователь не авторизован </response>
-    /// <response code="403"> Пользователь имеет недостаточно прав </response>
-    [HttpPut]
-    [Authorize]
-    [ProducesResponseType(typeof(void), 204)]
-    [ProducesResponseType(typeof(List<string>), 400)]
-    [ProducesResponseType(typeof(List<string>), 401)]
-    [ProducesResponseType(typeof(List<string>), 403)]
-    public async Task<IActionResult> Update()
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Проверка разрешения на изменение ивента
-    /// </summary>
-    /// <response code="200"> Успешно </response>
-    /// <response code="401"> Пользователь не авторизован </response>
-    [HttpGet("check-permission")]
-    [Authorize]
-    [ProducesResponseType(typeof(bool), 200)]
-    [ProducesResponseType(typeof(List<string>), 401)]
-    public async Task<IActionResult> CheckUserPermission()
-    {
-        throw new NotImplementedException();
+        var result = await _mediator.Send(request);
+        return result.ToActionResult();
     }
 
     /// <summary>
@@ -133,7 +95,8 @@ public class EventController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetEventsForModeration()
     {
-        throw new NotImplementedException();
+        var result = await _mediator.Send(new GetEventsForModerationQuery());
+        return result.ToActionResult();
     }
 
     /// <summary>
@@ -143,14 +106,15 @@ public class EventController : ControllerBase
     /// <response code="400"> Переданные параметры не прошли валидацию </response>
     /// <response code="401"> Пользователь не авторизован </response>
     /// <response code="403"> Пользователь имеет недостаточно прав </response>
-    [HttpPost("moderation")]
+    [HttpPatch("moderation")]
     [Authorize]
     [ProducesResponseType(typeof(void), 204)]
     [ProducesResponseType(typeof(List<string>), 400)]
     [ProducesResponseType(typeof(List<string>), 401)]
     [ProducesResponseType(typeof(List<string>), 403)]
-    public async Task<IActionResult> ModerateEvent()
+    public async Task<IActionResult> ModerateEvent(ModerateEventCommand request)
     {
-        throw new NotImplementedException();
+        var result = await _mediator.Send(request);
+        return result.ToActionResult();
     }
 }

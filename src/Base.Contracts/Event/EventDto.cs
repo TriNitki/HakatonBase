@@ -12,7 +12,13 @@ public class EventDto
 
     public string City { get; set; } = string.Empty;
 
-    public DateTime StartDT { get; set; }
+    public DateTime StartAt { get; set; }
+
+    public double? Cost { get; set; }
+
+    public long CreatorId { get; set; }
+
+    public string CreatorNickname { get; set; } = String.Empty;
 
     public List<string>? Categories { get; set; }
 }
