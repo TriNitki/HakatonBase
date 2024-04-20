@@ -1,4 +1,6 @@
-﻿using Base.Core.Domain;
+﻿using Base.Contracts.Event;
+using Base.Core.Domain;
+using Pkg.UseCases;
 
 namespace Base.UseCases.Abstractions;
 
@@ -38,4 +40,10 @@ public interface IUserRepository
     /// <param name="password"> Пароль пользователя </param>
     /// <returns> Пользователь </returns>
     Task<User?> GetByLoginPasswordAsync(string login, string password);
+
+    Task<List<Category>?> GetFavoritedCategories(long userId);
+
+    Task<List<Event>?> GetFavoritedEvents(long userId);
+
+    Task<List<UserCrossDto>?> Filter(long userId, bool byCrossedEvents = false);
 }

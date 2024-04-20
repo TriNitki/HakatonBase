@@ -24,7 +24,9 @@ public class Event
 
     public long CreatorId { get; set; }
 
-    public List<Category>? Categories { get; set; }
-    public List<User>? Guests { get; set; }
+
     public User? Creator { get; set; }
+    public List<EventToCategory>? EventToCategory { get; set; }
+    public List<EventToUser>? EventToUser { get; set; }
+
 }

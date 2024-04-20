@@ -12,8 +12,5 @@ internal class UserCfg : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.HasAlternateKey(x => x.Login);
-
-        builder.HasMany(x => x.Categories)
-            .WithMany();
     }
 }

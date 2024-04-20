@@ -3,6 +3,7 @@ using System;
 using Base.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Base.Service.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240420175808_init6")]
+    partial class init6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,11 +87,18 @@ namespace Base.Service.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_at");
 
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
                     b.HasKey("Id")
                         .HasName("pk_events");
 
                     b.HasIndex("CreatorId")
                         .HasDatabaseName("ix_events_creator_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_events_user_id");
 
                     b.ToTable("events", (string)null);
                 });
@@ -228,14 +238,19 @@ namespace Base.Service.Migrations
 
             modelBuilder.Entity("Base.Core.Domain.Event", b =>
                 {
-                    b.HasOne("Base.Core.Domain.User", "Creator")
+                    b.HasOne("Base.Core.Domain.User", null)
                         .WithMany()
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_events_users_creator_id");
+                        .HasConstraintName("fk_events_users_user_id1");
 
-                    b.Navigation("Creator");
+                    b.HasOne("Base.Core.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("fk_events_users_user_id");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Base.Core.Domain.EventToCategory", b =>

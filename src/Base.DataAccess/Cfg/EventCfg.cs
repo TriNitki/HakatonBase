@@ -8,7 +8,8 @@ internal class EventCfg : IEntityTypeConfiguration<Event>
 {
     public void Configure(EntityTypeBuilder<Event> builder)
     {
-        builder.HasMany<Category>()
-            .WithMany();
+        builder.HasOne(x => x.Creator)
+            .WithMany()
+            .HasForeignKey(x => x.CreatorId);
     }
 }

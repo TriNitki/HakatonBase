@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Base.Service.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    [Migration("20240420123430_init4")]
-    partial class init4
+    [Migration("20240420173800_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,11 +35,18 @@ namespace Base.Service.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("event_id");
 
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
                     b.HasKey("Name")
                         .HasName("pk_categories");
 
                     b.HasIndex("EventId")
                         .HasDatabaseName("ix_categories_event_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_categories_user_id");
 
                     b.ToTable("categories", (string)null);
                 });
@@ -86,9 +93,13 @@ namespace Base.Service.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<DateTime>("StartDT")
+                    b.Property<DateTime>("PublishedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("start_dt");
+                        .HasColumnName("published_at");
+
+                    b.Property<DateTime>("StartAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_at");
 
                     b.HasKey("Id")
                         .HasName("pk_events");
@@ -99,27 +110,46 @@ namespace Base.Service.Migrations
                     b.ToTable("events", (string)null);
                 });
 
-            modelBuilder.Entity("Base.Core.Domain.EventGuest", b =>
+            modelBuilder.Entity("Base.Core.Domain.EventToCategory", b =>
                 {
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("user_id");
-
                     b.Property<Guid>("EventId")
                         .HasColumnType("uuid")
                         .HasColumnName("event_id");
+
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("text")
+                        .HasColumnName("category_name");
+
+                    b.HasKey("EventId", "CategoryName")
+                        .HasName("pk_event_to_category");
+
+                    b.HasIndex("CategoryName")
+                        .HasDatabaseName("ix_event_to_category_category_name");
+
+                    b.ToTable("event_to_category", (string)null);
+                });
+
+            modelBuilder.Entity("Base.Core.Domain.EventToUser", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
-                    b.HasKey("UserId", "EventId")
-                        .HasName("pk_event_guests");
+                    b.HasKey("EventId", "UserId")
+                        .HasName("pk_event_to_user");
 
-                    b.HasIndex("EventId")
-                        .HasDatabaseName("ix_event_guests_event_id");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_event_to_user_user_id");
 
-                    b.ToTable("event_guests", (string)null);
+                    b.ToTable("event_to_user", (string)null);
                 });
 
             modelBuilder.Entity("Base.Core.Domain.RefreshToken", b =>
@@ -201,42 +231,23 @@ namespace Base.Service.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("CategoryEvent", b =>
+            modelBuilder.Entity("Base.Core.Domain.UserToCategory", b =>
                 {
-                    b.Property<string>("CategoryName")
-                        .HasColumnType("text")
-                        .HasColumnName("category_name");
-
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("event_id");
-
-                    b.HasKey("CategoryName", "EventId")
-                        .HasName("pk_category_event");
-
-                    b.HasIndex("EventId")
-                        .HasDatabaseName("ix_category_event_event_id");
-
-                    b.ToTable("category_event", (string)null);
-                });
-
-            modelBuilder.Entity("CategoryUser", b =>
-                {
-                    b.Property<string>("CategoriesName")
-                        .HasColumnType("text")
-                        .HasColumnName("categories_name");
-
                     b.Property<long>("UserId")
                         .HasColumnType("bigint")
                         .HasColumnName("user_id");
 
-                    b.HasKey("CategoriesName", "UserId")
-                        .HasName("pk_category_user");
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("text")
+                        .HasColumnName("category_name");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_category_user_user_id");
+                    b.HasKey("UserId", "CategoryName")
+                        .HasName("pk_user_to_category");
 
-                    b.ToTable("category_user", (string)null);
+                    b.HasIndex("CategoryName")
+                        .HasDatabaseName("ix_user_to_category_category_name");
+
+                    b.ToTable("user_to_category", (string)null);
                 });
 
             modelBuilder.Entity("Base.Core.Domain.Category", b =>
@@ -245,6 +256,11 @@ namespace Base.Service.Migrations
                         .WithMany("Categories")
                         .HasForeignKey("EventId")
                         .HasConstraintName("fk_categories_events_event_id");
+
+                    b.HasOne("Base.Core.Domain.User", null)
+                        .WithMany("Categories")
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("fk_categories_users_user_id");
                 });
 
             modelBuilder.Entity("Base.Core.Domain.Event", b =>
@@ -259,21 +275,42 @@ namespace Base.Service.Migrations
                     b.Navigation("Creator");
                 });
 
-            modelBuilder.Entity("Base.Core.Domain.EventGuest", b =>
+            modelBuilder.Entity("Base.Core.Domain.EventToCategory", b =>
+                {
+                    b.HasOne("Base.Core.Domain.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_event_to_category_categories_category_temp_id");
+
+                    b.HasOne("Base.Core.Domain.Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_event_to_category_events_event_id");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Event");
+                });
+
+            modelBuilder.Entity("Base.Core.Domain.EventToUser", b =>
                 {
                     b.HasOne("Base.Core.Domain.Event", "Event")
                         .WithMany()
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_event_guests_events_event_id");
+                        .HasConstraintName("fk_event_to_user_events_event_id");
 
                     b.HasOne("Base.Core.Domain.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_event_guests_users_user_id");
+                        .HasConstraintName("fk_event_to_user_users_user_id");
 
                     b.Navigation("Event");
 
@@ -298,38 +335,25 @@ namespace Base.Service.Migrations
                         .HasConstraintName("fk_users_events_event_id");
                 });
 
-            modelBuilder.Entity("CategoryEvent", b =>
+            modelBuilder.Entity("Base.Core.Domain.UserToCategory", b =>
                 {
-                    b.HasOne("Base.Core.Domain.Category", null)
+                    b.HasOne("Base.Core.Domain.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryName")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_category_event_categories_category_name");
+                        .HasConstraintName("fk_user_to_category_categories_category_temp_id1");
 
-                    b.HasOne("Base.Core.Domain.Event", null)
-                        .WithMany()
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_category_event_events_event_id");
-                });
-
-            modelBuilder.Entity("CategoryUser", b =>
-                {
-                    b.HasOne("Base.Core.Domain.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoriesName")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_category_user_categories_categories_name");
-
-                    b.HasOne("Base.Core.Domain.User", null)
+                    b.HasOne("Base.Core.Domain.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_category_user_users_user_id");
+                        .HasConstraintName("fk_user_to_category_users_user_id");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Base.Core.Domain.Event", b =>
@@ -337,6 +361,11 @@ namespace Base.Service.Migrations
                     b.Navigation("Categories");
 
                     b.Navigation("Guests");
+                });
+
+            modelBuilder.Entity("Base.Core.Domain.User", b =>
+                {
+                    b.Navigation("Categories");
                 });
 #pragma warning restore 612, 618
         }

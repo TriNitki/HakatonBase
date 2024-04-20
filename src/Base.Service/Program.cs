@@ -2,7 +2,6 @@ using Pkg.Data.DI;
 using Base.DataAccess;
 using Base.Service.Options;
 using Base.UseCases.Abstractions;
-using MNX.SecurityManagement.DataAccess;
 using AutoMapper;
 using Base.Core.Providers;
 using Base.Service.Infrastructure;
@@ -12,7 +11,6 @@ using Base.DataAccess.Repositories;
 using Base.Core.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 using Base.UseCases.Commands.Auth.Login;
 
 namespace Service;
@@ -82,6 +80,7 @@ public class Program
         services.AddScoped<ITokenRepository, TokenRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
 
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddSingleton<IPasswordHashProvider, PasswordHashProvider>();

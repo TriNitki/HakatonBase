@@ -3,6 +3,7 @@ using System;
 using Base.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Base.Service.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240420174256_init3")]
+    partial class init3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,11 +87,15 @@ namespace Base.Service.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_at");
 
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
                     b.HasKey("Id")
                         .HasName("pk_events");
 
-                    b.HasIndex("CreatorId")
-                        .HasDatabaseName("ix_events_creator_id");
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_events_user_id");
 
                     b.ToTable("events", (string)null);
                 });
@@ -228,27 +235,23 @@ namespace Base.Service.Migrations
 
             modelBuilder.Entity("Base.Core.Domain.Event", b =>
                 {
-                    b.HasOne("Base.Core.Domain.User", "Creator")
+                    b.HasOne("Base.Core.Domain.User", null)
                         .WithMany()
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_events_users_creator_id");
-
-                    b.Navigation("Creator");
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("fk_events_users_user_id");
                 });
 
             modelBuilder.Entity("Base.Core.Domain.EventToCategory", b =>
                 {
                     b.HasOne("Base.Core.Domain.Category", "Category")
-                        .WithMany("EventToCategory")
+                        .WithMany()
                         .HasForeignKey("CategoryName")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_event_to_category_categories_category_temp_id");
 
                     b.HasOne("Base.Core.Domain.Event", "Event")
-                        .WithMany("EventToCategory")
+                        .WithMany()
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -262,14 +265,14 @@ namespace Base.Service.Migrations
             modelBuilder.Entity("Base.Core.Domain.EventToUser", b =>
                 {
                     b.HasOne("Base.Core.Domain.Event", "Event")
-                        .WithMany("EventToUser")
+                        .WithMany()
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_event_to_user_events_event_id");
 
                     b.HasOne("Base.Core.Domain.User", "User")
-                        .WithMany("EventToUser")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -309,23 +312,6 @@ namespace Base.Service.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Base.Core.Domain.Category", b =>
-                {
-                    b.Navigation("EventToCategory");
-                });
-
-            modelBuilder.Entity("Base.Core.Domain.Event", b =>
-                {
-                    b.Navigation("EventToCategory");
-
-                    b.Navigation("EventToUser");
-                });
-
-            modelBuilder.Entity("Base.Core.Domain.User", b =>
-                {
-                    b.Navigation("EventToUser");
                 });
 #pragma warning restore 612, 618
         }
