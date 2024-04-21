@@ -24,6 +24,7 @@ public class MappingProfiles : Profile
                 StartAt = x.StartAt,
                 PublishedAt = DateTime.UtcNow,
                 Cost = x.Cost,
+                Reward = x.Reward,
                 IsActive = true,
                 IsModerated = false
             });

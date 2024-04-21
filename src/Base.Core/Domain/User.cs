@@ -9,6 +9,7 @@ public class User
     public bool TwoFactorAuth { get; set; } = false;
     public bool IsBlocked { get; set; } = false;
     public string? Email { get; set; }
+    public double Points { get; set; }
 
     public List<EventToUser>? EventToUser { get; set; }
 }

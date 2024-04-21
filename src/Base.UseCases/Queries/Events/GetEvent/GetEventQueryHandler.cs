@@ -37,6 +37,7 @@ public class GetEventQueryHandler : IRequestHandler<GetEventQuery, Result<EventD
             City = eventDto.City,
             StartAt = eventDto.StartAt,
             Cost = eventDto.Cost,
+            Reward = eventDto.Reward,
             Categories = cats,
             CreatorId = eventDto.CreatorId,
             CreatorNickname = eventDto.Creator.Nickname

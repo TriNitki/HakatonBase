@@ -3,6 +3,7 @@ using System;
 using Base.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Base.Service.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240421021115_merch")]
+    partial class merch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -232,8 +235,8 @@ namespace Base.Service.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password_hash");
 
-                    b.Property<double>("Points")
-                        .HasColumnType("double precision")
+                    b.Property<int>("Points")
+                        .HasColumnType("integer")
                         .HasColumnName("points");
 
                     b.Property<bool>("TwoFactorAuth")
@@ -278,15 +281,15 @@ namespace Base.Service.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("merch_id");
 
-                    b.Property<DateTime>("PurchasedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("purchased_at");
-
                     b.Property<long>("Amount")
                         .HasColumnType("bigint")
                         .HasColumnName("amount");
 
-                    b.HasKey("UserId", "MerchId", "PurchasedAt")
+                    b.Property<DateTime>("PurchasedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("purchased_at");
+
+                    b.HasKey("UserId", "MerchId")
                         .HasName("pk_user_to_merch");
 
                     b.HasIndex("MerchId")

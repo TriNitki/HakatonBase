@@ -18,6 +18,8 @@ public class Event
 
     public double? Cost { get; set; }
 
+    public int Reward { get; set; }
+
     public bool IsActive { get; set; }
 
     public bool IsModerated { get; set; }

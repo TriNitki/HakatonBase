@@ -18,6 +18,10 @@ public class CategoryController : ControllerBase
         this.authUserAccessor = authUserAccessor;
     }
 
+    /// <summary>
+    /// Получить список всех категорий
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     [ProducesResponseType(typeof(List<string>), 200)]
     public async Task<IActionResult> GetCategories()
@@ -36,7 +40,12 @@ public class CategoryController : ControllerBase
 
         return Ok(result);
     }
-
+    
+    /// <summary>
+    /// Создание новой категории
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns></returns>
     [HttpPost]
     [ProducesResponseType(typeof(List<string>), 200)]
     public async Task<IActionResult> Create(Category category)
@@ -48,6 +57,11 @@ public class CategoryController : ControllerBase
         return Ok(id);
     }
 
+    /// <summary>
+    /// Пометить категорию любимой
+    /// </summary>
+    /// <param name="categoryName"></param>
+    /// <returns></returns>
     [HttpPatch("{categoryName}")]
     public async Task<IActionResult> FavoriteCategory(string categoryName)
     {

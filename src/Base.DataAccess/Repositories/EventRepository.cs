@@ -73,6 +73,11 @@ public class EventRepository : IEventRepository
 
     public async Task GoToEvent(Guid id, long userId)
     {
+        var eventDomain = await _context.Events.SingleOrDefaultAsync(x => x.Id == id);
+        var user = await _context.Users.SingleOrDefaultAsync(x => x.Id == userId);
+
+        user.Points += eventDomain.Reward;
+
         await _context.EventToUser.AddAsync(new EventToUser() { EventId = id, UserId = userId}).ConfigureAwait(false);
         await _context.SaveChangesAsync().ConfigureAwait(false);
     }
