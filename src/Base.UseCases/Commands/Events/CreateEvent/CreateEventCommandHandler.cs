@@ -30,6 +30,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Res
             StartAt = request.StartAt,
             PublishedAt = DateTime.UtcNow,
             Cost = request.Cost,
+            Reward = request.Reward,
             IsActive = true,
             IsModerated = false
         };

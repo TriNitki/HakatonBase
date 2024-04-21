@@ -16,6 +16,8 @@ public class EventDto
 
     public double? Cost { get; set; }
 
+    public int Reward { get; set; }
+
     public long CreatorId { get; set; }
 
     public string CreatorNickname { get; set; } = String.Empty;
