@@ -28,8 +28,8 @@ public class MerchRepository : IMerchRepository
 
     public async Task Purchase(long userId, Guid merchId, uint amount)
     {
-        var merch = await context.Merch.SingleOrDefaultAsync(x => x.Id == merchId).ConfigureAwait(false);
-        var user = await context.Users.SingleOrDefaultAsync(x => x.Id == userId).ConfigureAwait(false);
+        var merch = await context.Merch.SingleOrDefaultAsync(x => x.Id == merchId);
+        var user = await context.Users.SingleOrDefaultAsync(x => x.Id == userId);
 
         if (user == null || merch == null)
             return;

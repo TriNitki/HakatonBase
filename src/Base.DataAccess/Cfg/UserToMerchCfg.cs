@@ -13,6 +13,6 @@ public class UserToMerchCfg : IEntityTypeConfiguration<UserToMerch>
 {
     public void Configure(EntityTypeBuilder<UserToMerch> builder)
     {
-        builder.HasKey(x => new { x.UserId, x.MerchId });
+        builder.HasKey(x => new { x.UserId, x.MerchId, x.PurchasedAt });
     }
 }

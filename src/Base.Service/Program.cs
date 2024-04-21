@@ -71,6 +71,8 @@ public class Program
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IMerchRepository, MerchRepository>();
+
 
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddSingleton<IPasswordHashProvider, PasswordHashProvider>();

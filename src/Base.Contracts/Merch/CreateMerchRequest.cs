@@ -1,11 +1,10 @@
-﻿namespace Base.Core.Domain;
+﻿namespace Base.Contracts.Merch;
 
-public class Merch
+public class CreateMerchRequest
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public string? Image {  get; set; }
+    public string? Image { get; set; }
     public uint Stock { get; set; }
     public double Price { get; set; }
 }
